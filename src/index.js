@@ -117,6 +117,13 @@ app.get("/account", verifyIfAccountCPF, (req, resp) => {
   return resp.json(customer);
 })
 
+app.get("/balance", verifyIfAccountCPF, (req, resp) => {
+ const {customer} = req;
+ const balance = getBalance(customer.movimentation);
+
+ return resp.json(balance);
+})
+
 app.put("/account", verifyIfAccountCPF, (req, resp) => {
 const {name} = req.body;
 const {customer} = req;
@@ -126,6 +133,14 @@ customer.name = name;
 
 return resp.status(201).send()
 
+})
+
+app.delete("/account", verifyIfAccountCPF, (req, resp) => {
+  const {customer} = req;
+
+  customers.splice(customer, 1);
+
+  return resp.status(200).json(customers);
 })
 
 app.listen(3331);
