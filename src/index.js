@@ -111,5 +111,21 @@ app.get("/movimentation/date", verifyIfAccountCPF, (req, resp) => {
   return resp.json(movimentation);
 });
 
+app.get("/account", verifyIfAccountCPF, (req, resp) => {
+  const {customer} = req;
+
+  return resp.json(customer);
+})
+
+app.put("/account", verifyIfAccountCPF, (req, resp) => {
+const {name} = req.body;
+const {customer} = req;
+
+
+customer.name = name;
+
+return resp.status(201).send()
+
+})
 
 app.listen(3331);
