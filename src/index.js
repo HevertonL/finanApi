@@ -21,6 +21,17 @@ function verifyIfAccountCPF(req, resp, next) {
   return next();
 }
 
+function getBalance(movimentation) {
+  const balance = movimentation.reduce((acc, op) => {
+  if (op.type === "credit") {
+    return acc + op.amount;
+  } else {
+    return acc - op.amount;
+  }
+  }, 0);
+  return balance;
+}
+
 app.post("/account", (req, resp) => {
   const {cpf, name} = req.body;
   const customerAlreadyExists = customers
@@ -41,27 +52,50 @@ return resp.status(201).send();
 
 });
 
-app.get("/movimentation", verifyIfAccountCPF, (req, resp) => {
-  const {customer} = req;
-
-  return resp.json(customer.movimentation);
-});
-
 app.post("/deposit", verifyIfAccountCPF, (req, resp) => {
   const {description, amount} = req.body;
   
   const {customer} = req;
 
-  const movimentationDeposit = {
+  const op = {
     description,
     amount,
     created_at: new Date(),
     type: "credit"
   }
 
-  customer.movimentation.push(movimentationDeposit);
+  customer.movimentation.push(op);
   return resp.status(201).send();
 
 })
+
+app.post("/withdraw", verifyIfAccountCPF, (req, resp) => {
+ const {description, amount} = req.body;
+ const {customer} = req;
+
+ const balance = getBalance(customer.movimentation);
+ 
+ if (balance < amount) {
+   return resp.status(400).json({error: "Insufficient funds!"})
+ }
+
+ const op = {
+  description,
+  amount,
+  created_at: new Date(),
+  type: "debit"
+};
+
+ customer.movimentation.push(op);
+ return resp.status(201).send();
+
+})
+
+app.get("/movimentation", verifyIfAccountCPF, (req, resp) => {
+  const {customer} = req;
+
+  return resp.json(customer.movimentation);
+});
+
 
 app.listen(3331);
