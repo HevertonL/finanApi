@@ -7,12 +7,18 @@ app.use(express.json())
 
 const customers = [];
 
-/* 
-* id = uuid
-* cpf = string;
-* name = string;
-* movimentation = []
-*/
+function verifyIfAccountCPF(req, resp, next) {
+  const {cpf} = req.headers;
+  const customer = customers.find(customer => customer.cpf === cpf);
+
+  if(!customer) {
+    return resp.status(400).json({error: "Conta não existe"});
+  }
+
+  req.customer = customer;
+
+  return next();
+}
 
 app.post("/account", (req, resp) => {
   const {cpf, name} = req.body;
@@ -34,9 +40,8 @@ return resp.status(201).send();
 
 });
 
-app.get("/movimentation/:cpf", (req, resp) => {
-  const {cpf} = req.params;
-  const customer = customers.find(customer => customer.cpf === cpf)
+app.get("/movimentation", verifyIfAccountCPF, (req, resp) => {
+  const {customer} = req;
 
   return resp.json(customer.movimentation);
 });
