@@ -97,5 +97,19 @@ app.get("/movimentation", verifyIfAccountCPF, (req, resp) => {
   return resp.json(customer.movimentation);
 });
 
+app.get("/movimentation/date", verifyIfAccountCPF, (req, resp) => {
+  const {customer} = req;
+  const {date} = req.query;
+
+  const dateFormat = new Date(date + " 00:00");
+
+  const movimentation = customer.movimentation.filter(
+    (movimentation) => 
+    movimentation.created_at.toDateString() === 
+    new Date(dateFormat).toDateString());
+
+  return resp.json(movimentation);
+});
+
 
 app.listen(3331);
